@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipTube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;
+  --surface:#212121;
+  --surface2:#272727;
+  --surface3:#333;
+  --text:#f1f1f1;
+  --text2:#aaa;
+  --text3:#666;
+  --border:#333;
+  --red:#ff0000;
+  --red2:#cc0000;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;font-size:14px}
+
+/* ── HEADER ── */
+.header{
+  display:flex;align-items:center;gap:16px;
+  padding:8px 20px;height:56px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+}
+.logo{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;cursor:pointer}
+.logo svg{width:90px;height:20px}
+.search-wrap{flex:1;display:flex;justify-content:center}
+.search-form{display:flex;width:100%;max-width:600px}
+.search-form input{
+  flex:1;padding:8px 16px;
+  border:1px solid #444;border-right:none;
+  border-radius:40px 0 0 40px;
+  background:#121212;color:var(--text);font-size:15px;outline:none;
+}
+.search-form input:focus{border-color:#aaa}
+.search-form input::placeholder{color:var(--text3)}
+.search-btn{
+  padding:8px 20px;
+  background:var(--surface2);
+  border:1px solid #444;border-left:none;
+  border-radius:0 40px 40px 0;
+  cursor:pointer;color:var(--text2);font-size:18px;
+  transition:background 0.15s;
+}
+.search-btn:hover{background:var(--surface3)}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:none;border:none;cursor:pointer;color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.icon-btn:hover{background:var(--surface2)}
+.avatar{width:32px;height:32px;border-radius:50%;background:#ff6b35;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;cursor:pointer}
+
+/* ── CHIPS ── */
+.chips-wrap{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:190;padding:0 20px}
+.chips{display:flex;gap:8px;padding:10px 0;overflow-x:auto}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  padding:6px 14px;border-radius:40px;
+  background:var(--surface2);border:none;
+  font-size:13px;cursor:pointer;white-space:nowrap;
+  color:var(--text);transition:background 0.15s;font-family:inherit;
+}
+.chip:hover{background:var(--surface3)}
+.chip.active{background:var(--text);color:var(--bg)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:calc(100vh - 106px)}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;min-width:240px;
+  padding:8px 0;
+  background:var(--bg);
+  position:sticky;top:106px;
+  height:calc(100vh - 106px);
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+.nav-item{
+  display:flex;align-items:center;gap:20px;
+  padding:10px 20px;font-size:13px;cursor:pointer;
+  color:var(--text);border-radius:10px;margin:0 8px;
+  transition:background 0.1s;
+}
+.nav-item:hover{background:var(--surface2)}
+.nav-item.active{background:var(--surface2);font-weight:500}
+.nav-icon{font-size:20px;width:24px;text-align:center}
+.nav-divider{height:1px;background:var(--border);margin:8px 0}
+.nav-section{padding:12px 20px 4px;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em}
+
+/* ── MAIN ── */
+.main{flex:1;padding:20px;min-width:0}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
+.video-card{cursor:pointer;border-radius:10px;overflow:hidden;transition:transform 0.15s}
+.video-card:hover .thumb-wrap img{transform:scale(1.03)}
+.thumb-wrap{
+  position:relative;width:100%;padding-top:56.25%;
+  background:var(--surface2);overflow:hidden;border-radius:10px;
+}
+.thumb-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform 0.3s}
+.duration{
+  position:absolute;bottom:6px;right:6px;
+  background:rgba(0,0,0,0.88);color:white;
+  font-size:12px;padding:2px 6px;border-radius:4px;font-weight:500;
+}
+.card-info{display:flex;gap:12px;padding:10px 2px}
+.ch-av{width:36px;height:36px;min-width:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
+.card-text{flex:1;min-width:0}
+.card-title{font-size:14px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
+.card-meta{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* ── PLAYER VIEW ── */
+#playerView{display:none}
+.back-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:14px;cursor:pointer;color:var(--text2);
+  background:none;border:none;padding:0;margin-bottom:16px;
+  font-family:inherit;transition:color 0.15s;
+}
+.back-btn:hover{color:var(--text)}
+
+.player-layout{display:flex;gap:24px;align-items:flex-start}
+.player-col{flex:1;min-width:0}
+
+/* The actual player container */
+.player-box{
+  width:100%;padding-top:56.25%;position:relative;
+  background:#000;border-radius:12px;overflow:hidden;
+}
+.player-box iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+/* Fallback shown when iframe fails */
+.player-fallback{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:#111;
+}
+.player-fallback.show{display:flex}
+.play-on-yt{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;background:var(--red);color:white;
+  border-radius:30px;font-size:15px;font-weight:600;
+  cursor:pointer;border:none;font-family:inherit;
+  transition:background 0.15s;text-decoration:none;
+}
+.play-on-yt:hover{background:var(--red2)}
+.play-on-yt svg{width:24px;height:24px;fill:white}
+
+.video-title-big{font-size:20px;font-weight:700;margin:16px 0 8px;line-height:1.35;color:var(--text)}
+.meta-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.meta-views{font-size:13px;color:var(--text2)}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
+.act-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;background:var(--surface2);
+  border:none;border-radius:40px;font-size:13px;
+  cursor:pointer;color:var(--text);font-family:inherit;
+  transition:background 0.15s;
+}
+.act-btn:hover{background:var(--surface3)}
+.act-btn.liked{background:#263850;color:#4fc3f7}
+
+.channel-strip{display:flex;align-items:center;gap:12px;margin-top:16px}
+.ch-av-lg{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0}
+.ch-name{font-size:15px;font-weight:500}
+.ch-subs{font-size:12px;color:var(--text2)}
+.sub-btn{
+  margin-left:auto;padding:9px 20px;
+  background:var(--text);color:var(--bg);
+  border:none;border-radius:40px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:opacity 0.15s;
+}
+.sub-btn:hover{opacity:0.85}
+.sub-btn.subbed{background:var(--surface2);color:var(--text)}
+
+.desc-box{
+  background:var(--surface2);border-radius:10px;
+  padding:14px 16px;margin-top:16px;font-size:13px;line-height:1.7;
+  cursor:pointer;color:var(--text);
+}
+.desc-box .short{font-weight:500;color:var(--text2);margin-bottom:4px}
+.desc-box .full{display:none;margin-top:8px;white-space:pre-wrap;word-break:break-word}
+.desc-box.open .full{display:block}
+.desc-box.open .more-lbl{display:none}
+.more-lbl{font-size:13px;font-weight:500;margin-top:6px;color:var(--text)}
+
+.comments-wrap{margin-top:24px}
+.comments-hdr{font-size:16px;font-weight:500;margin-bottom:16px}
+.cmt{display:flex;gap:12px;margin-bottom:18px}
+.cmt-av{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
+.cmt-author{font-size:13px;font-weight:500}
+.cmt-text{font-size:13px;color:#ccc;margin-top:3px;line-height:1.5;word-break:break-word}
+.cmt-meta{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* ── SIDEBAR RECS ── */
+.recs-col{width:400px;min-width:360px;flex-shrink:0}
+.recs-hdr{font-size:15px;font-weight:500;margin-bottom:14px}
+.rec{display:flex;gap:8px;margin-bottom:10px;cursor:pointer;border-radius:8px;padding:6px;transition:background 0.12s}
+.rec:hover{background:var(--surface2)}
+.rec-thumb{width:168px;height:94px;border-radius:8px;overflow:hidden;background:var(--surface2);position:relative;flex-shrink:0}
+.rec-thumb img{width:100%;height:100%;object-fit:cover}
+.rec-thumb .duration{font-size:11px}
+.rec-info{flex:1;min-width:0;padding:2px 0}
+.rec-title{font-size:13px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
+.rec-ch{font-size:12px;color:var(--text2);margin-top:5px}
+
+/* ── SHORTS SCROLLER ── */
+#shortsView{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:500;overflow:hidden}
+.shorts-close{position:fixed;top:16px;left:20px;z-index:600;background:rgba(0,0,0,0.6);border:none;color:white;font-size:20px;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:background 0.15s}
+.shorts-close:hover{background:rgba(255,255,255,0.15)}
+.shorts-logo{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:600;display:flex;align-items:center;gap:6px;font-family:'Roboto',sans-serif;font-weight:700;font-size:14px;color:white;pointer-events:none;white-space:nowrap}
+.shorts-logo svg{width:70px;height:16px}
+.shorts-feed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
+.shorts-feed::-webkit-scrollbar{display:none}
+.short-item{height:100vh;width:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;position:relative;background:#000;overflow:hidden}
+.short-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(22px) brightness(0.35);transform:scale(1.1);z-index:0}
+.short-player{position:relative;z-index:1;width:min(360px,calc(100vh * 9/16));height:min(640px,100vh);max-height:100vh;background:#111;border-radius:14px;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,0.8)}
+.short-player iframe{width:100%;height:100%;border:none;display:block}
+.short-thumb-cover{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:opacity 0.3s}
+.short-play-icon{width:64px;height:64px;background:rgba(0,0,0,0.65);border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.short-play-icon svg{width:28px;height:28px;fill:white;margin-left:4px}
+.short-actions{position:absolute;right:-60px;bottom:100px;display:flex;flex-direction:column;gap:20px;align-items:center;z-index:2}
+.short-act{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.short-act-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.12);border:none;color:white;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(6px);transition:background 0.15s,transform 0.1s}
+.short-act-btn:hover{background:rgba(255,255,255,0.22);transform:scale(1.08)}
+.short-act-btn.liked-s{background:rgba(255,50,50,0.35)}
+.short-act-label{font-size:11px;color:rgba(255,255,255,0.75);font-family:'Roboto',sans-serif}
+.short-info{position:absolute;bottom:0;left:0;right:0;padding:20px 16px 28px;z-index:2;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,transparent 100%);pointer-events:none}
+.short-channel{display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:all}
+.short-ch-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;border:2px solid white;flex-shrink:0}
+.short-ch-name{font-size:13px;font-weight:600;color:white}
+.short-sub-mini{margin-left:auto;padding:5px 14px;background:white;color:#000;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Roboto',sans-serif;transition:opacity 0.15s;pointer-events:all}
+.short-sub-mini:hover{opacity:0.85}
+.short-sub-mini.subbed{background:rgba(255,255,255,0.2);color:white}
+.short-title{font-size:13px;color:rgba(255,255,255,0.9);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.short-dots{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:600;display:flex;flex-direction:column;gap:5px;align-items:center}
+.short-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.25s}
+.short-dot.active{height:18px;border-radius:2px;background:white}
+.shorts-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;color:white;font-family:'Roboto',sans-serif}
+
+/* ── LOADING / STATE ── */
+.loading{display:flex;justify-content:center;align-items:center;padding:80px;gap:12px;flex-direction:column}
+.spinner{width:40px;height:40px;border:3px solid var(--surface3);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:80px 20px;color:var(--text2)}
+.empty .ico{font-size:48px;margin-bottom:12px}
+.err-banner{background:#2a0f0f;border:1px solid #5a1f1f;border-radius:10px;padding:14px 18px;font-size:13px;color:#ff8a80;margin-bottom:16px}
+
+/* ── NOTE BANNER ── */
+.note{background:#1a2a1a;border:1px solid #2e5c2e;border-radius:10px;padding:10px 16px;font-size:12px;color:#81c784;margin-bottom:16px;line-height:1.5}
+
+@media(max-width:900px){.sidebar{display:none}.recs-col{display:none}}
+@media(max-width:600px){.main{padding:12px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="goHome()">
+    <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="20" rx="5" fill="#ff0000"/>
+      <polygon points="11,5 21,10 11,15" fill="white"/>
+      <text x="33" y="15" font-family="Roboto,sans-serif" font-weight="700" font-size="14" fill="#f1f1f1">ClipTube</text>
+    </svg>
+  </div>
+  <div class="search-wrap">
+    <div class="search-form">
+      <input id="searchInput" type="text" placeholder="Search videos..." />
+      <button class="search-btn" onclick="doSearch()">🔍</button>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn" title="Notifications">🔔</button>
+    <div class="avatar">U</div>
+  </div>
+</div>
+
+<!-- CHIPS -->
+<div class="chips-wrap">
+  <div class="chips" id="chipsBar">
+    <button class="chip active" onclick="selectChip(this,'')">All</button>
+    <button class="chip" onclick="openShorts()">⚡ Shorts</button>
+    <button class="chip" onclick="selectChip(this,'music')">Music</button>
+    <button class="chip" onclick="selectChip(this,'gaming')">Gaming</button>
+    <button class="chip" onclick="selectChip(this,'news')">News</button>
+    <button class="chip" onclick="selectChip(this,'sports')">Sports</button>
+    <button class="chip" onclick="selectChip(this,'technology')">Technology</button>
+    <button class="chip" onclick="selectChip(this,'cooking')">Cooking</button>
+    <button class="chip" onclick="selectChip(this,'travel')">Travel</button>
+    <button class="chip" onclick="selectChip(this,'comedy')">Comedy</button>
+    <button class="chip" onclick="selectChip(this,'science')">Science</button>
+    <button class="chip" onclick="selectChip(this,'fitness')">Fitness</button>
+    <button class="chip" onclick="selectChip(this,'anime')">Anime</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-item active" onclick="goHome()"><span class="nav-icon">🏠</span>Home</div>
+    <div class="nav-item" onclick="openShorts()"><span class="nav-icon">⚡</span>Shorts</div>
+    <div class="nav-item"><span class="nav-icon">📺</span>Subscriptions</div>
+    <div class="nav-divider"></div>
+    <div class="nav-item"><span class="nav-icon">📚</span>Library</div>
+    <div class="nav-item"><span class="nav-icon">🕐</span>History</div>
+    <div class="nav-item"><span class="nav-icon">👍</span>Liked videos</div>
+    <div class="nav-item"><span class="nav-icon">⬇️</span>Downloads</div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Explore</div>
+    <div class="nav-item" onclick="selectChipByTopic('trending')"><span class="nav-icon">🔥</span>Trending</div>
+    <div class="nav-item" onclick="selectChipByTopic('music')"><span class="nav-icon">🎵</span>Music</div>
+    <div class="nav-item" onclick="selectChipByTopic('gaming')"><span class="nav-icon">🎮</span>Gaming</div>
+    <div class="nav-item" onclick="selectChipByTopic('news')"><span class="nav-icon">📰</span>News</div>
+    <div class="nav-item" onclick="selectChipByTopic('sports')"><span class="nav-icon">🏆</span>Sports</div>
+    <div class="nav-item" onclick="selectChipByTopic('technology')"><span class="nav-icon">💻</span>Technology</div>
+    <div class="nav-divider"></div>
+    <div style="padding:12px 20px;font-size:11px;color:var(--text3);line-height:1.6">
+      About · Press · Copyright<br>Contact · Creators<br>Advertise · Developers<br><br>
+      Privacy · Terms · Settings<br>
+      © 2025 ClipTube
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HOME VIEW -->
+    <div id="homeView">
+      <div id="errEl" style="display:none"></div>
+      <div class="grid" id="videoGrid"></div>
+      <div id="loadingEl" class="loading" style="display:none">
+        <div class="spinner"></div>
+        <div style="color:var(--text2);font-size:13px">Loading videos...</div>
+      </div>
+      <div id="stateEl" class="empty" style="display:none">
+        <div class="ico">📺</div>
+        <div>No videos found</div>
+      </div>
+    </div>
+
+    <!-- PLAYER VIEW -->
+    <div id="playerView">
+      <button class="back-btn" onclick="goHome()">
+        ← Back to home
+      </button>
+      <div id="playerArea"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SHORTS VIEW -->
+<div id="shortsView">
+  <button class="shorts-close" onclick="closeShorts()">✕</button>
+  <div class="shorts-logo">
+    <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="20" rx="5" fill="#ff0000"/>
+      <polygon points="11,5 21,10 11,15" fill="white"/>
+      <text x="33" y="15" font-family="Roboto,sans-serif" font-weight="700" font-size="14" fill="#f1f1f1">Shorts</text>
+    </svg>
+    <span style="opacity:0.5;font-size:16px">⚡</span>
+  </div>
+  <div class="short-dots" id="shortDots"></div>
+  <div class="shorts-feed" id="shortsFeed">
+    <div class="shorts-loading">
+      <div class="spinner"></div>
+      <div style="font-size:13px;opacity:0.6">Loading shorts...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'AIzaSyAjJaBDJiU8oAXTrvCz3IB5COw7L6XxZ9o';
+const BASE = 'https://www.googleapis.com/youtube/v3';
+let currentTopic = '', nextPageToken = '', liked = {};
+
+const COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63','#00bcd4','#8bc34a','#d35400','#16a085'];
+function chColor(n){let h=0;for(const c of(n||''))h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h];}
+function ini(n){return(n||'?').split(/\s+/).map(w=>w[0]||'').join('').substring(0,2).toUpperCase()||'?';}
+function fmtN(n){if(!n)return'';n=parseInt(n);if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return Math.round(n/1000)+'K';return n.toLocaleString();}
+function fmtD(iso){if(!iso)return'';const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);if(!m)return'';const h=+m[1]||0,mn=+m[2]||0,s=+m[3]||0;return h?`${h}:${mn<10?'0':''}${mn}:${s<10?'0':''}${s}`:`${mn}:${s<10?'0':''}${s}`;}
+function fmtAgo(d){if(!d)return'';const v=Math.floor((Date.now()-new Date(d))/1000);if(v<60)return v+'s ago';if(v<3600)return Math.floor(v/60)+'m ago';if(v<86400)return Math.floor(v/3600)+'h ago';if(v<2592000)return Math.floor(v/86400)+' days ago';if(v<31536000)return Math.floor(v/2592000)+' months ago';return Math.floor(v/31536000)+' years ago';}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function loadVideos(reset=true){
+  if(reset){nextPageToken='';document.getElementById('videoGrid').innerHTML='';}
+  document.getElementById('errEl').style.display='none';
+  document.getElementById('stateEl').style.display='none';
+  document.getElementById('loadingEl').style.display='flex';
+
+  const q=document.getElementById('searchInput').value.trim();
+  let items=[];
+  try{
+    if(q||currentTopic){
+      const term=q||currentTopic;
+      let url=`${BASE}/search?part=snippet&q=${encodeURIComponent(term)}&type=video&maxResults=24&order=viewCount&key=${KEY}`;
+      if(nextPageToken)url+=`&pageToken=${nextPageToken}`;
+      const d=await(await fetch(url)).json();
+      if(d.error){showErr(d.error.message);return;}
+      nextPageToken=d.nextPageToken||'';
+      const ids=(d.items||[]).map(i=>i.id?.videoId).filter(Boolean).join(',');
+      if(ids){items=(await(await fetch(`${BASE}/videos?part=snippet,statistics,contentDetails&id=${ids}&key=${KEY}`)).json()).items||[];}
+    }else{
+      let url=`${BASE}/videos?part=snippet,statistics,contentDetails&chart=mostPopular&maxResults=24&regionCode=US&key=${KEY}`;
+      if(nextPageToken)url+=`&pageToken=${nextPageToken}`;
+      const d=await(await fetch(url)).json();
+      if(d.error){showErr(d.error.message);return;}
+      nextPageToken=d.nextPageToken||'';
+      items=d.items||[];
+    }
+    renderCards(items,reset);
+    if(!items.length)document.getElementById('stateEl').style.display='';
+  }catch(e){showErr('Network error — check your connection. '+e.message);}
+  document.getElementById('loadingEl').style.display='none';
+}
+
+function showErr(msg){
+  document.getElementById('loadingEl').style.display='none';
+  const el=document.getElementById('errEl');
+  el.className='err-banner';el.textContent='⚠️ '+msg;el.style.display='';
+}
+
+function renderCards(items,reset){
+  const grid=document.getElementById('videoGrid');
+  if(reset)grid.innerHTML='';
+  items.forEach(v=>{
+    const s=v.snippet||{},st=v.statistics||{};
+    const dur=fmtD(v.contentDetails?.duration);
+    const thumb=s.thumbnails?.medium?.url||s.thumbnails?.default?.url||'';
+    const col=chColor(s.channelTitle);
+    const card=document.createElement('div');
+    card.className='video-card';
+    card.innerHTML=`
+      <div class="thumb-wrap">
+        ${thumb?`<img src="${thumb}" loading="lazy" alt="${esc(s.title)}">`:''}
+        ${dur?`<span class="duration">${dur}</span>`:''}
+      </div>
+      <div class="card-info">
+        <div class="ch-av" style="background:${col}">${ini(s.channelTitle)}</div>
+        <div class="card-text">
+          <div class="card-title">${esc(s.title)}</div>
+          <div class="card-meta">${esc(s.channelTitle)}${st.viewCount?' • '+fmtN(st.viewCount)+' views':''}${s.publishedAt?' • '+fmtAgo(s.publishedAt):''}</div>
+        </div>
+      </div>`;
+    card.onclick=()=>openVideo(v.id,s,st,v.contentDetails);
+    grid.appendChild(card);
+  });
+}
+
+// Store video data for recs
+const videoCache = {};
+
+async function openVideo(videoId, snippet, stats, contentDetails){
+  document.getElementById('homeView').style.display='none';
+  document.getElementById('playerView').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('playerArea').innerHTML=`<div class="loading"><div class="spinner"></div><div style="color:var(--text2);font-size:13px">Loading...</div></div>`;
+
+  const s=snippet||{},st=stats||{};
+  const col=chColor(s.channelTitle);
+  const rawDesc=s.description||'';
+  const descEsc=esc(rawDesc).replace(/\n/g,'<br>');
+  const descShort=rawDesc.length>200?esc(rawDesc.substring(0,200))+'…':descEsc;
+  const ytUrl=`https://www.youtube.com/watch?v=${videoId}`;
+  const thumb=s.thumbnails?.maxres?.url||s.thumbnails?.high?.url||s.thumbnails?.medium?.url||'';
+  const isLiked=!!liked[videoId];
+
+  let recsHtml='';
+  let commentsHtml='';
+
+  try{
+    const [relRes,comRes]=await Promise.all([
+      fetch(`${BASE}/search?part=snippet&relatedToVideoId=${videoId}&type=video&maxResults=12&key=${KEY}`),
+      fetch(`${BASE}/commentThreads?part=snippet&videoId=${videoId}&maxResults=12&order=relevance&key=${KEY}`)
+    ]);
+    const relData=await relRes.json(),comData=await comRes.json();
+    const rids=(relData.items||[]).map(i=>i.id?.videoId).filter(Boolean).join(',');
+    if(rids){
+      const rddet=await(await fetch(`${BASE}/videos?part=snippet,contentDetails,statistics&id=${rids}&key=${KEY}`)).json();
+      (rddet.items||[]).forEach(rv=>{
+        const rs=rv.snippet||{},rd=fmtD(rv.contentDetails?.duration),rthumb=rs.thumbnails?.medium?.url||'';
+        const rcol=chColor(rs.channelTitle);
+        videoCache[rv.id]={s:rs,st:rv.statistics||{},cd:rv.contentDetails||{}};
+        recsHtml+=`<div class="rec" onclick="openVideo('${rv.id}',videoCache['${rv.id}'].s,videoCache['${rv.id}'].st,videoCache['${rv.id}'].cd)">
+          <div class="rec-thumb">
+            ${rthumb?`<img src="${rthumb}" loading="lazy" alt="">`:''}
+            ${rd?`<span class="duration">${rd}</span>`:''}
+          </div>
+          <div class="rec-info">
+            <div class="rec-title">${esc(rs.title)}</div>
+            <div class="rec-ch">${esc(rs.channelTitle)}</div>
+            <div class="rec-ch">${fmtN(rv.statistics?.viewCount)||''} views${rs.publishedAt?' • '+fmtAgo(rs.publishedAt):''}</div>
+          </div>
+        </div>`;
+      });
+    }
+    (comData.items||[]).forEach(ct=>{
+      const c=ct.snippet?.topLevelComment?.snippet||{};
+      const au=c.authorDisplayName||'User',ccol=chColor(au);
+      commentsHtml+=`<div class="cmt">
+        <div class="cmt-av" style="background:${ccol}">${ini(au)}</div>
+        <div>
+          <span class="cmt-author">${esc(au)}</span>
+          <div class="cmt-text">${esc(c.textDisplay||'').substring(0,600).replace(/\n/g,'<br>')}</div>
+          <div class="cmt-meta">${fmtAgo(c.publishedAt)}${c.likeCount>0?' · 👍 '+fmtN(c.likeCount):''}</div>
+        </div>
+      </div>`;
+    });
+  }catch(e){}
+
+  document.getElementById('playerArea').innerHTML=`
+    <div class="note">
+      ℹ️ <strong>Tip:</strong> If the video shows a black screen or error, click <strong>"Watch on YouTube"</strong> to open it directly.
+      YouTube restricts embedding on some videos — this is their policy, not a bug.
+    </div>
+    <div class="player-layout">
+      <div class="player-col">
+        <div class="player-box">
+          <iframe
+            id="ytFrame"
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1"
+            allowfullscreen
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+          <div class="player-fallback" id="fallback">
+            ${thumb?`<img src="${thumb}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.3" alt="">`:''}
+            <div style="position:relative;text-align:center">
+              <div style="color:#ccc;font-size:14px;margin-bottom:16px">This video can't be embedded.<br>Watch it directly on YouTube.</div>
+              <a class="play-on-yt" href="${ytUrl}" target="_blank">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Watch on YouTube
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <h1 class="video-title-big">${esc(s.title)}</h1>
+        <div class="meta-row">
+          <span class="meta-views">${fmtN(st.viewCount)||'?'} views • ${fmtAgo(s.publishedAt)}</span>
+          <div class="action-btns">
+            <button class="act-btn ${isLiked?'liked':''}" id="likeBtn" onclick="toggleLike('${videoId}')">
+              👍 ${isLiked?'Liked':fmtN(st.likeCount)||'Like'}
+            </button>
+            <button class="act-btn">👎</button>
+            <button class="act-btn" onclick="window.open('${ytUrl}','_blank')">↗ Share</button>
+            <button class="act-btn">⬇ Save</button>
+            <a class="act-btn" href="${ytUrl}" target="_blank" style="text-decoration:none">▶ Open YT</a>
+          </div>
+        </div>
+
+        <div class="channel-strip">
+          <div class="ch-av-lg" style="background:${col}">${ini(s.channelTitle)}</div>
+          <div>
+            <div class="ch-name">${esc(s.channelTitle)}</div>
+            <div class="ch-subs">${fmtN(st.subscriberCount)?fmtN(st.subscriberCount)+' subscribers':''}</div>
+          </div>
+          <button class="sub-btn" id="subBtn" onclick="toggleSub(this)">Subscribe</button>
+        </div>
+
+        ${rawDesc?`
+        <div class="desc-box" id="descBox" onclick="document.getElementById('descBox').classList.toggle('open')">
+          <div class="short">${fmtAgo(s.publishedAt)} • ${fmtN(st.viewCount)||'?'} views</div>
+          <div>${descShort}</div>
+          <div class="full">${descEsc}</div>
+          <div class="more-lbl">...more</div>
+        </div>`:''}
+
+        ${commentsHtml?`
+        <div class="comments-wrap">
+          <div class="comments-hdr">${fmtN(st.commentCount)||''} Comments</div>
+          ${commentsHtml}
+        </div>`:''}
+      </div>
+
+      <div class="recs-col">
+        <div class="recs-hdr">Up next</div>
+        ${recsHtml||'<div style="color:var(--text2);font-size:13px">No recommendations found</div>'}
+      </div>
+    </div>`;
+
+  // Detect iframe load failure
+  const frame=document.getElementById('ytFrame');
+  if(frame){
+    // Show fallback after timeout if iframe seems broken
+    setTimeout(()=>{
+      try{
+        // If we're on file:// the iframe will likely error
+        if(window.location.protocol==='file:'){
+          document.getElementById('fallback').classList.add('show');
+        }
+      }catch(e){}
+    }, 3500);
+  }
+}
+
+function toggleLike(vid){
+  liked[vid]=!liked[vid];
+  const btn=document.getElementById('likeBtn');
+  if(btn){btn.classList.toggle('liked',liked[vid]);btn.innerHTML=liked[vid]?'👍 Liked':'👍 Like';}
+}
+function toggleSub(btn){
+  const subbed=btn.classList.toggle('subbed');
+  btn.textContent=subbed?'Subscribed':'Subscribe';
+}
+
+function goHome(){
+  document.getElementById('homeView').style.display='';
+  document.getElementById('playerView').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function doSearch(){
+  currentTopic='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.chip').classList.add('active');
+  loadVideos();
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter')doSearch();
+});
+
+function selectChip(el,topic){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentTopic=topic;
+  document.getElementById('searchInput').value='';
+  loadVideos();
+}
+function selectChipByTopic(topic){
+  currentTopic=topic;
+  document.getElementById('searchInput').value='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  loadVideos();
+}
+
+// ── SHORTS SCROLLER ──
+let shortsLoaded = false;
+let shortsData = [];
+let currentShortIndex = 0;
+let shortsLiked = {};
+
+async function openShorts() {
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('playerView').style.display = 'none';
+  document.getElementById('shortsView').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  if (!shortsLoaded) await loadShorts();
+}
+
+function closeShorts() {
+  document.getElementById('shortsView').style.display = 'none';
+  document.body.style.overflow = '';
+  document.getElementById('homeView').style.display = '';
+  // Pause all iframes
+  document.querySelectorAll('#shortsFeed iframe').forEach(f =>
+    f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*')
+  );
+}
+
+async function loadShorts() {
+  const feed = document.getElementById('shortsFeed');
+  feed.innerHTML = `<div class="shorts-loading"><div class="spinner"></div><div style="font-size:13px;opacity:0.6">Loading shorts...</div></div>`;
+  try {
+    // Search for #shorts videos — short vertical clips
+    const queries = ['#shorts funny', '#shorts viral', '#shorts cooking', '#shorts gaming'];
+    const q = queries[Math.floor(Math.random() * queries.length)];
+    const res = await fetch(`${BASE}/search?part=snippet&q=${encodeURIComponent(q)}&type=video&videoDuration=short&maxResults=20&key=${KEY}`);
+    const data = await res.json();
+    if (data.error) { feed.innerHTML = `<div class="shorts-loading" style="color:#ff8a80">⚠️ ${data.error.message}</div>`; return; }
+    const ids = (data.items || []).map(i => i.id?.videoId).filter(Boolean).join(',');
+    if (!ids) { feed.innerHTML = `<div class="shorts-loading">No shorts found</div>`; return; }
+    const details = await (await fetch(`${BASE}/videos?part=snippet,statistics,contentDetails&id=${ids}&key=${KEY}`)).json();
+    // Filter to truly short videos (under 3 min)
+    shortsData = (details.items || []).filter(v => {
+      const m = (v.contentDetails?.duration || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!m) return true;
+      const h = +m[1] || 0, mn = +m[2] || 0;
+      return h === 0 && mn < 3;
+    }).slice(0, 12);
+    if (!shortsData.length) { feed.innerHTML = `<div class="shorts-loading">No shorts found</div>`; return; }
+    renderShorts();
+    shortsLoaded = true;
+  } catch(e) {
+    feed.innerHTML = `<div class="shorts-loading" style="color:#ff8a80">⚠️ Network error: ${e.message}</div>`;
+  }
+}
+
+function renderShorts() {
+  const feed = document.getElementById('shortsFeed');
+  feed.innerHTML = '';
+  const dots = document.getElementById('shortDots');
+  dots.innerHTML = '';
+
+  shortsData.forEach((v, i) => {
+    const s = v.snippet || {}, st = v.statistics || {};
+    const thumb = s.thumbnails?.high?.url || s.thumbnails?.medium?.url || '';
+    const col = chColor(s.channelTitle);
+    const isLiked = !!shortsLiked[v.id];
+
+    const item = document.createElement('div');
+    item.className = 'short-item';
+    item.dataset.index = i;
+    item.dataset.vid = v.id;
+
+    item.innerHTML = `
+      <div class="short-bg" style="background-image:url('${thumb}')"></div>
+      <div class="short-player" id="sp-${v.id}">
+        <div class="short-thumb-cover" id="cover-${v.id}" style="background-image:url('${thumb}')" onclick="playShort('${v.id}')">
+          <div class="short-play-icon">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="short-actions">
+        <div class="short-act">
+          <button class="short-act-btn ${isLiked ? 'liked-s' : ''}" id="slike-${v.id}" onclick="toggleShortLike('${v.id}',event)">👍</button>
+          <span class="short-act-label">${fmtN(st.likeCount) || 'Like'}</span>
+        </div>
+        <div class="short-act">
+          <button class="short-act-btn" onclick="event.stopPropagation()">💬</button>
+          <span class="short-act-label">${fmtN(st.commentCount) || '0'}</span>
+        </div>
+        <div class="short-act">
+          <button class="short-act-btn" onclick="window.open('https://youtube.com/watch?v=${v.id}','_blank');event.stopPropagation()">↗</button>
+          <span class="short-act-label">Share</span>
+        </div>
+        <div class="short-act">
+          <button class="short-act-btn" onclick="event.stopPropagation()">⋯</button>
+          <span class="short-act-label">More</span>
+        </div>
+      </div>
+      <div class="short-info">
+        <div class="short-channel">
+          <div class="short-ch-av" style="background:${col}">${ini(s.channelTitle)}</div>
+          <span class="short-ch-name">${esc(s.channelTitle)}</span>
+          <button class="short-sub-mini" onclick="this.classList.toggle('subbed');this.textContent=this.classList.contains('subbed')?'✓ Subscribed':'Subscribe'">Subscribe</button>
+        </div>
+        <div class="short-title">${esc(s.title)}</div>
+      </div>`;
+
+    feed.appendChild(item);
+
+    // Dot indicator
+    const dot = document.createElement('div');
+    dot.className = 'short-dot' + (i === 0 ? ' active' : '');
+    dot.dataset.i = i;
+    dot.onclick = () => scrollToShort(i);
+    dots.appendChild(dot);
+  });
+
+  // Observer for snap-scroll: detect which slide is active
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const vid = entry.target.dataset.vid;
+
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
+        const idx = +entry.target.dataset.index;
+        currentShortIndex = idx;
+        updateDots(idx);
+
+        // Pause ALL other iframes via YouTube postMessage API
+        document.querySelectorAll('#shortsFeed .short-item').forEach(el => {
+          if (el.dataset.vid !== vid) {
+            const sp2 = document.getElementById(`sp-${el.dataset.vid}`);
+            const f = sp2 ? sp2.querySelector('iframe') : null;
+            if (f) f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+          }
+        });
+
+        // Play this one
+        const cover = document.getElementById(`cover-${vid}`);
+        const sp = document.getElementById(`sp-${vid}`);
+        if (sp && !sp.querySelector('iframe')) {
+          setTimeout(() => playShort(vid), 250);
+        }
+      }
+    });
+  }, { threshold: 0.6 });
+
+  feed.querySelectorAll('.short-item').forEach(el => observer.observe(el));
+}
+
+function playShort(vid) {
+  const cover = document.getElementById(`cover-${vid}`);
+  const sp = document.getElementById(`sp-${vid}`);
+  if (!sp) return;
+  // Remove any stale iframe first
+  sp.querySelectorAll('iframe').forEach(f => f.remove());
+  if (cover) {
+    cover.style.opacity = '0';
+    setTimeout(() => { if (cover) cover.style.display = 'none'; }, 300);
+  }
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube.com/embed/${vid}?autoplay=1&loop=1&playlist=${vid}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+  iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+  iframe.allowFullscreen = true;
+  sp.appendChild(iframe);
+}
+
+function scrollToShort(i) {
+  const items = document.querySelectorAll('.short-item');
+  if (items[i]) items[i].scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateDots(activeIdx) {
+  document.querySelectorAll('.short-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === activeIdx);
+  });
+}
+
+function toggleShortLike(vid, e) {
+  e.stopPropagation();
+  shortsLiked[vid] = !shortsLiked[vid];
+  const btn = document.getElementById(`slike-${vid}`);
+  if (btn) btn.classList.toggle('liked-s', shortsLiked[vid]);
+}
+
+// Kick it off
+loadVideos();
+</script>
+</body>
+</html>
